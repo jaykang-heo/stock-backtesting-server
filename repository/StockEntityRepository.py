@@ -1,37 +1,37 @@
 from entity.StockEntity import StockEntity
 import psycopg2
-import sqlite3
 
 
 class StockEntityRepository:
     def __init__(self):
         # self.conn = sqlite3.connect("C:/Users/PC/Desktop/stockTrading2/sqlite3.db")
-        self.conn = psycopg2.connect(host="localhost", dbname="db", user="root", password="password")
+        self.conn = psycopg2.connect(host="localhost", dbname="postgres", user="root", password="password")
         self.cur = self.conn.cursor()
         self.cur.execute("create table if not exists stocks("
-                         "Code varchar(50), "
-                         "StockType varchar(50), "
-                         "Date varchar(50), "
-                         "ChangeRate varchar(50), "
-                         "Open varchar(50), "
-                         "High varchar(50), "
-                         "Low varchar(50), "
-                         "Closing varchar(50), "
-                         "Volume varchar(50), "
-                         "Amount varchar(50))")
+                         "code varchar(50), "
+                         "stocktype varchar(50), "
+                         "date varchar(50), "
+                         "changerate varchar(50), "
+                         "open varchar(50), "
+                         "high varchar(50), "
+                         "low varchar(50), "
+                         "closing varchar(50), "
+                         "volume varchar(50), "
+                         "amount varchar(50))")
         self.conn.commit()
 
     def saveEntity(self, entity: StockEntity):
+        query = """
+            insert into 
+            stocks (code, stocktype, date, changerate, open, high, low, closing, volume, amount) 
+            values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """
+        data = (entity.code, entity.stockType, entity.date, entity.changeRate, entity.open, entity.high, entity.low, entity.close, entity.volume, entity.amount)
         self.cur.execute(
-            "insert into stocks values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", (entity.code, entity.stockType, entity.date, entity.changeRate, entity.open, entity.high, entity.low, entity.close, entity.volume, entity.amount)
+            query,
+            data
         )
         self.conn.commit()
-
-    def saveAllEntity(self, entities):
-        pass
-
-    def getEntityByCode(self, code):
-        pass
 
     def existByCode(self, code):
         self.cur.execute(

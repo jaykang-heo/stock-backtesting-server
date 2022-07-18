@@ -1,4 +1,5 @@
 from pykrx import stock
+import pandas
 import time
 
 class KrxService:
@@ -9,4 +10,4 @@ class KrxService:
         time.sleep(1)
         kospi = stock.get_market_ohlcv(date, market="KOSPI")
         kosdaq = stock.get_market_ohlcv(date, market="KOSDAQ")
-        return kospi.append(kosdaq)
+        return pandas.concat([kospi, kosdaq])
