@@ -1,8 +1,17 @@
+from entity.data import Filter
+from entity.data import VolumeOrder
 from repository.StockEntityRepository import StockEntityRepository
 
 
 class StockConditionService:
-    def __int__(self):
+    def __init__(self):
         self.stockRepository = StockEntityRepository()
-        pass
+
+    def findStocksByFilter(self, filter: Filter):
+        volumeOrderedStocks = self.stockRepository.findByVolumeOrder(
+            filter.date,
+            filter.volumeOrder.limit,
+            filter.volumeOrder.ascending
+        )
+        return volumeOrderedStocks
 

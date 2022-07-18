@@ -8,16 +8,16 @@ class StockEntityRepository:
         self.conn = psycopg2.connect(host="localhost", dbname="postgres", user="root", password="password")
         self.cur = self.conn.cursor()
         self.cur.execute("create table if not exists stocks("
-                         "code varchar(50), "
+                         "code varchar(255), "
                          "stocktype varchar(50), "
-                         "date varchar(50), "
-                         "changerate varchar(50), "
-                         "open varchar(50), "
-                         "high varchar(50), "
-                         "low varchar(50), "
-                         "closing varchar(50), "
-                         "volume varchar(50), "
-                         "amount varchar(50))")
+                         "date timestamp, "
+                         "changerate float, "
+                         "open bigint, "
+                         "high bigint, "
+                         "low bigint, "
+                         "closing bigint, "
+                         "volume bigint, "
+                         "amount bigint)")
         self.conn.commit()
 
     def saveEntity(self, entity: StockEntity):
@@ -33,31 +33,34 @@ class StockEntityRepository:
         )
         self.conn.commit()
 
-    def existByCode(self, code):
-        self.cur.execute(
-            f"select * from stocks where code = {code}"
-        )
-        res = self.cur.fetchall()
-        if len(res) != 0:
-            return True
+    def findByVolumeOrder(self, date, limit, ascending):
+        if ascending:
+            query = """
+            select * from stocks
+            where date = %s
+            order by volume asc 
+            limit %s
+            """
+            data = (str(date), limit)
+            self.cur.execute(
+                query,
+                data
+            )
+            return self.cur.fetchall()
         else:
-            return False
+            query = """
+                        select * from stocks
+                        where date = %s
+                        order by volume desc 
+                        limit %s
+                        """
+            data = (str(date), limit)
+            self.cur.execute(
+                query,
+                data
+            )
+            return self.cur.fetchall()
 
-    def findAll(self):
-        self.cur.execute("select * from stocks")
-        return self.cur.fetchall()
 
-    def findAllStocksByAmountDescending(self, limit):
-        self.cur.execute(
-            "select * from stocks order by Amount "
-
-        )
-        pass
-
-    def findAllStocksByChangeRateDescending(self, limit):
-        pass
-
-    def findAllStocksByVolumeDescending(self, limit):
-        pass
 
 

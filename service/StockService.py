@@ -31,14 +31,14 @@ class StockService:
                 stockEntity = StockEntity(
                     code=stock.name,
                     stockType="",
-                    changeRate=stock["등락률"],
+                    changeRate=float(stock["등락률"]),
                     date=date,
-                    open=stock["시가"],
-                    high=stock["고가"],
-                    low=stock["저가"],
-                    close=stock["종가"],
-                    volume=stock["거래량"],
-                    amount=stock["거래대금"]
+                    open=int(stock["시가"]),
+                    high=int(stock["고가"]),
+                    low=int(stock["저가"]),
+                    close=int(stock["종가"]),
+                    volume=int(stock["거래량"]),
+                    amount=int(stock["거래대금"])
                 )
                 self.stockEntityRepository.saveEntity(stockEntity)
 
