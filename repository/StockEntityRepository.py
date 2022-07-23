@@ -1,5 +1,7 @@
 from entity.StockEntity import StockEntity
 import psycopg2
+import pandas as pd
+import talib
 
 
 class StockEntityRepository:
@@ -61,6 +63,111 @@ class StockEntityRepository:
             )
             return self.cur.fetchall()
 
+    def findByAmountOrder(self, date, limit, ascending):
+        if ascending:
+            query = """
+            select * from stocks
+            where date = %s
+            order by amount asc
+            limit %s
+            """
+            data = (str(date), limit)
+            self.cur.execute(
+                query,
+                data
+            )
+            return self.cur.fetchall()
+        else:
+            query = """
+                        select * from stocks
+                        where date = %s
+                        order by amount desc
+                        limit %s
+                        """
+            data = (str(date), limit)
+            self.cur.execute(
+                query,
+                data
+            )
+            return self.cur.fetchall()
 
+    def findByChnageRateOrder(self, date, limit, ascending):
+        if ascending:
+            query = """
+            select * from stocks
+            where date = %s
+            order by changerate asc
+            limit %s
+            """
+            data = (str(date), limit)
+            self.cur.execute(
+                query,
+                data
+            )
+            return self.cur.fetchall()
+        else:
+            query = """
+                        select * from stocks
+                        where date = %s
+                        order by changerate desc
+                        limit %s
+                        """
+            data = (str(date), limit)
+            self.cur.execute(
+                query,
+                data
+            )
+            return self.cur.fetchall()
 
+    def findByCci(self, date,  period, line):
+        query = """
+        select * from stocks
+        where date <= %s
+        order by date desc
+        limit %s
+        """
+        data = (date, period)
+        self.cur.execute(query, data)
+        entities = self.cur.fetchall()
+        df = [i.toDict() for i in entities]
+        res = talib.CCI(
+            df["high"],
+            df["low"],
+            df["close"],
+            period=period
+        )
+        return res
+
+    def findBySigma(self, date, period, line):
+        query = """
+                select * from stocks
+                where date <= %s
+                order by date desc
+                limit %s
+                """
+        data = (date, period)
+        self.cur.execute(query, data)
+        entities = self.cur.fetchall()
+        df = [i.toDict() for i in entities]
+
+        res = df['close'].rolling(period).std()
+        return res
+
+    def findByParabolic(self, date, acceleration, maximum, upper):
+        query = """
+        select * from stocks
+        where date <= %s
+        order by date desc
+        """
+        data = date
+        self.cur.execute(query, data)
+        entities = self.cur.fetchall()
+        df = [i.toDict() for i in entities]
+        res = talib.SAR(
+            df["high"],
+            df["low"],
+            acceleration=acceleration,
+            maximum=maximum
+        )
+        return res
 

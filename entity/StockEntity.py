@@ -1,4 +1,5 @@
-class StockEntity:
+
+class StockEntity(object):
     # TODO: get accurate quarter and year profit
     def __init__(self, code, stockType, date, changeRate, open, high, low, close, volume, amount):
         # 종목코드
@@ -21,3 +22,16 @@ class StockEntity:
         # 거래대금
         self.amount = amount
 
+    def toDict(self):
+        return {
+            'code': self.code,
+            'stockType': self.stockType,
+            'date': self.date,
+            'changeRate': self.changeRate,
+            'open': self.open,
+            'high': self.high,
+            'low': self.low,
+            'close': self.close,
+            'volume': self.volume,
+            'amount': self.amount
+        }
