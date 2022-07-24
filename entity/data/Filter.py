@@ -14,6 +14,7 @@ class Filter:
     ):
         self.date = date
         self.volumeOrder = volumeOrder
+        self.amountOrder = amountOrder
         self.sigmaOrder = sigmaOrder
         self.psarOrder = psarOrder
         self.changeRateOrder = changeRateOrder

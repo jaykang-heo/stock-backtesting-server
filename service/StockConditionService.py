@@ -1,4 +1,4 @@
-from entity.data import Filter
+from entity.data import Filter, VolumeOrder, AmountOrder, CciOrder, ChangeRateOrder, PsarOrder, SigmaOrder
 from repository.StockEntityRepository import StockEntityRepository
 
 
@@ -19,18 +19,19 @@ class StockConditionService:
             filter.amountOrder.ascending
         )
 
-        # changerateOrderedStocks = self.stockRepository.findByChnageRateOrder(
-        #     filter.date,
-        #     filter.changeRateOrder.limit,
-        #     filter.changeRateOrder.ascending
-        # )
-        #
-        # cciStocks = self.stockRepository.findByCci(
-        #     filter.date,
-        #     filter.cciOrder.period,
-        #     filter.cciOrder.line
-        # )
-        #
+        changerateOrderedStocks = self.stockRepository.findByChnageRateOrder(
+            filter.date,
+            filter.changeRateOrder.limit,
+            filter.changeRateOrder.ascending
+        )
+
+        cciStocks = self.stockRepository.findByCci(
+            filter.date,
+            filter.cciOrder.period,
+            filter.cciOrder.line
+        )
+        print(cciStocks)
+
         # sigmaStocks = self.stockRepository.findBySigma(
         #     filter.date,
         #     filter.sigmaOrder.period,
@@ -46,3 +47,22 @@ class StockConditionService:
 
         return volumeOrderedStocks
 
+
+test = StockConditionService()
+volumeOrder = VolumeOrder.VolumeOrder(10, False)
+amountOrder = AmountOrder.AmountOrder(10, False)
+changeRateOrder = ChangeRateOrder.ChangeRateOrder(10, False)
+cciOrder = CciOrder.CciOrder(6000, 100)
+psarOrder = PsarOrder.PsarOrder(0.0000002, 0.0000002, True)
+sigmaOrder = SigmaOrder.SigmaOrder(20, 200)
+res = test.findStocksByFilter(
+    Filter.Filter(
+        20220722,
+        volumeOrder=volumeOrder,
+        amountOrder=amountOrder,
+        changeRateOrder=changeRateOrder,
+        cciOrder=cciOrder,
+        psarOrder=psarOrder,
+        sigmaOrder=sigmaOrder
+    )
+)

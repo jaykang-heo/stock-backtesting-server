@@ -3,6 +3,8 @@ import psycopg2
 import pandas as pd
 import talib
 
+from service.Utils import Utils
+
 
 class StockEntityRepository:
     def __init__(self):
@@ -17,23 +19,39 @@ class StockEntityRepository:
                          "open bigint, "
                          "high bigint, "
                          "low bigint, "
-                         "closing bigint, "
+                         "close bigint, "
                          "volume bigint, "
-                         "amount bigint)")
+                         "amount bigint)",
+                         "primary key (code, date)"
+                         )
         self.conn.commit()
+        # DI
+        self.utils = Utils()
+
+    def deleteAll(self):
+        query = """
+        delete from stocks
+        """
+        self.cur.execute(query)
+        self.conn.commit()
+
 
     def saveEntity(self, entity: StockEntity):
         query = """
-            insert into 
-            stocks (code, stocktype, date, changerate, open, high, low, closing, volume, amount) 
-            values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-            """
-        data = (entity.code, entity.stockType, entity.date, entity.changeRate, entity.open, entity.high, entity.low, entity.close, entity.volume, entity.amount)
-        self.cur.execute(
-            query,
-            data
-        )
-        self.conn.commit()
+                    insert into 
+                    stocks (code, stocktype, date, changerate, open, high, low, close, volume, amount) 
+                    values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    """
+        data = (entity.code, entity.stockType, entity.date, entity.changeRate, entity.open, entity.high, entity.low,
+                entity.close, entity.volume, entity.amount)
+        if entity.high == 0 and entity.low == 0 and entity.close == 0 and entity.open == 0:
+            pass
+        else:
+            self.cur.execute(
+                query,
+                data
+            )
+            self.conn.commit()
 
     def findByVolumeOrder(self, date, limit, ascending):
         if ascending:
@@ -122,19 +140,21 @@ class StockEntityRepository:
     def findByCci(self, date,  period, line):
         query = """
         select * from stocks
-        where date <= %s
+        where date <= (%s)::text::timestamptz
         order by date desc
         limit %s
         """
         data = (date, period)
         self.cur.execute(query, data)
         entities = self.cur.fetchall()
-        df = [i.toDict() for i in entities]
+
+        dfList = [self.utils.tupleToStockEntity(i).toDict() for i in entities]
+        df = pd.DataFrame.from_records(dfList)
         res = talib.CCI(
             df["high"],
             df["low"],
             df["close"],
-            period=period
+            timeperiod=period
         )
         return res
 

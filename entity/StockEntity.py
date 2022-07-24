@@ -1,4 +1,3 @@
-
 class StockEntity(object):
     # TODO: get accurate quarter and year profit
     def __init__(self, code, stockType, date, changeRate, open, high, low, close, volume, amount):
@@ -35,3 +34,5 @@ class StockEntity(object):
             'volume': self.volume,
             'amount': self.amount
         }
+
+

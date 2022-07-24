@@ -1,32 +1,24 @@
-import datetime
-import pandas as pd
-
 from entity.StockEntity import StockEntity
 from repository.StockEntityRepository import StockEntityRepository
 from infra.KrxService import KrxService
+from service.Utils import Utils
+import datetime
 
 
 class StockService:
     def __init__(self):
         self.stockEntityRepository = StockEntityRepository()
+        self.stockEntityRepository.deleteAll()
         self.krxService = KrxService()
-
-    @staticmethod
-    def __getYearDates():
-        date = datetime.date.today()
-        # sdate = datetime.date(2019, 3, 22)  # start date
-        sdate = datetime.date(date.year, date.month, date.day)  # start date
-        # edate = datetime.date(date.year-1, date.month, date.day)
-        # edate = datetime.date(2019, 3, 23)
-        # return pd.date_range(sdate, edate-datetime.timedelta(days=1), freq='d').strftime('%Y%m%d').tolist()
-        return pd.date_range(sdate, sdate, freq='d').strftime('%Y%m%d').tolist()
+        self.utils = Utils()
 
     def syncStocksFromKrxAndSave(self):
-        dates = self.__getYearDates()
-        for date in dates:
-            print(date)
+        # dates = self.utils.getYearDates()
+        today = datetime.date.today().strftime('%Y%m%d')
+        validDates = self.krxService.getValidBusinessDays(fromDate=19850101, toDate=today)
+        for date in validDates:
             stocks = self.krxService.findStocksByCode(date)
-            print(len(stocks))
+            print(date, len(stocks))
             for index, stock in stocks.iterrows():
                 stockEntity = StockEntity(
                     code=stock.name,
@@ -41,6 +33,7 @@ class StockService:
                     amount=int(stock["거래대금"])
                 )
                 self.stockEntityRepository.saveEntity(stockEntity)
+
 
 test = StockService()
 test.syncStocksFromKrxAndSave()
