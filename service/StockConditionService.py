@@ -25,12 +25,11 @@ class StockConditionService:
             filter.changeRateOrder.ascending
         )
 
-        cciStocks = self.stockRepository.findByCci(
-            filter.date,
-            filter.cciOrder.period,
-            filter.cciOrder.line
-        )
-        print(cciStocks)
+        # cciStocks = self.stockRepository.findByCci(
+        #     filter.date,
+        #     filter.cciOrder.period,
+        #     filter.cciOrder.line
+        # )
 
         # sigmaStocks = self.stockRepository.findBySigma(
         #     filter.date,
@@ -45,7 +44,7 @@ class StockConditionService:
         #     filter.psarOrder.upper
         # )
 
-        return volumeOrderedStocks
+        return set(volumeOrderedStocks) & set(amountOrderedStocks) & set(changerateOrderedStocks)
 
 
 test = StockConditionService()
