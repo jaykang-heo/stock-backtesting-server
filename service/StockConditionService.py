@@ -1,3 +1,5 @@
+import datetime
+
 from entity.data import Filter, VolumeOrder, AmountOrder, CciOrder, ChangeRateOrder, PsarOrder, SigmaOrder
 from repository.StockEntityRepository import StockEntityRepository
 
@@ -7,61 +9,88 @@ class StockConditionService:
         self.stockRepository = StockEntityRepository()
 
     def findStocksByFilter(self, filter: Filter):
-        volumeOrderedStocks = self.stockRepository.findByVolumeOrder(
-            filter.date,
-            filter.volumeOrder.limit,
-            filter.volumeOrder.ascending
-        )
+        volumeOrderedStocks = []
+        for volumeOrderFilter in filter.volumeOrders:
+            volumeOrderedStock = self.stockRepository.findByVolumeOrder(
+                filter.date,
+                volumeOrderFilter.limit,
+                volumeOrderFilter.ascending
+            )
+            for stock in volumeOrderedStock:
+                volumeOrderedStocks.append(stock)
 
-        amountOrderedStocks = self.stockRepository.findByAmountOrder(
-            filter.date,
-            filter.amountOrder.limit,
-            filter.amountOrder.ascending
-        )
+        amountOrderedStocks = []
+        for amountOrderFilter in filter.amountOrders:
+            amountOrderedStock = self.stockRepository.findByAmountOrder(
+                filter.date,
+                amountOrderFilter.limit,
+                amountOrderFilter.ascending
+            )
+            for stock in amountOrderedStock:
+                amountOrderedStocks.append(stock)
 
-        changerateOrderedStocks = self.stockRepository.findByChnageRateOrder(
-            filter.date,
-            filter.changeRateOrder.limit,
-            filter.changeRateOrder.ascending
-        )
+        changerateOrderedStocks = []
+        for changeRateOrderFilter in filter.changeRateOrders:
+            changerateOrderedStock = self.stockRepository.findByChnageRateOrder(
+                filter.date,
+                changeRateOrderFilter.limit,
+                changeRateOrderFilter.ascending
+            )
+            for stock in changerateOrderedStock:
+                changerateOrderedStocks.append(stock)
 
-        # cciStocks = self.stockRepository.findByCci(
-        #     filter.date,
-        #     filter.cciOrder.period,
-        #     filter.cciOrder.line
-        # )
+        temp1 = set([i[0] for i in volumeOrderedStocks])
+        temp2 = set([i[0] for i in amountOrderedStocks])
+        temp3 = set([i[0] for i in changerateOrderedStocks])
 
-        # sigmaStocks = self.stockRepository.findBySigma(
-        #     filter.date,
-        #     filter.sigmaOrder.period,
-        #     filter.sigmaOrder.line
-        # )
-        #
-        # psarStocks = self.stockRepository.findByParabolic(
-        #     filter.date,
-        #     filter.psarOrder.acceleration,
-        #     filter.psarOrder.maximum,
-        #     filter.psarOrder.upper
-        # )
+        codes = list(temp1 & temp2 & temp3)
 
-        return set(volumeOrderedStocks) & set(amountOrderedStocks) & set(changerateOrderedStocks)
+        cciStocks = []
+        for code in codes:
+            for cciFilter in filter.cciOrders:
+                cciStock = self.stockRepository.findByCci(
+                    filter.date,
+                    code,
+                    cciFilter.period,
+                    cciFilter.line
+                )
+                cciStocks.append(cciStock)
+
+        sigmaStocks = []
+        for code in codes[:1]:
+            for sigmaFilter in filter.sigmaOrders:
+                sigmaStock = self.stockRepository.findBySigma(
+                    filter.date,
+                    code,
+                    sigmaFilter.period,
+                    sigmaFilter.line
+                )
+                sigmaStocks.append(sigmaStock)
+
+        psarStocks = []
+        for code in codes:
+            for psarFilter in filter.psarOrders:
+                psarStock = self.stockRepository.findByParabolicUpper(
+                    filter.date,
+                    code,
+                    psarFilter.acceleration,
+                    psarFilter.maximum,
+                    psarFilter.upper
+                )
+                psarStocks.append(psarStock)
+
+        temp4 = set([i[0] for i in cciStocks if i is not None])
+        # temp5 = [i[0] for i in sigmaStocks]
+        # temp6 = [i[0] for i in psarStocks]
+
+        res = temp1 & temp2 & temp3 & temp4
+
+        return res
+
+    def findStocksByCode(self, date, codes, volumeDescending):
+        if volumeDescending:
+            entities = self.stockRepository.findStocksByCodesAndOrderByVolumeDescending(date, codes)
+            return [i[0] for i in entities]
 
 
-test = StockConditionService()
-volumeOrder = VolumeOrder.VolumeOrder(10, False)
-amountOrder = AmountOrder.AmountOrder(10, False)
-changeRateOrder = ChangeRateOrder.ChangeRateOrder(10, False)
-cciOrder = CciOrder.CciOrder(6000, 100)
-psarOrder = PsarOrder.PsarOrder(0.0000002, 0.0000002, True)
-sigmaOrder = SigmaOrder.SigmaOrder(20, 200)
-res = test.findStocksByFilter(
-    Filter.Filter(
-        20220722,
-        volumeOrder=volumeOrder,
-        amountOrder=amountOrder,
-        changeRateOrder=changeRateOrder,
-        cciOrder=cciOrder,
-        psarOrder=psarOrder,
-        sigmaOrder=sigmaOrder
-    )
-)
+

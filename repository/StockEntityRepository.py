@@ -137,57 +137,76 @@ class StockEntityRepository:
             )
             return self.cur.fetchall()
 
-    def findByCci(self, date,  period, line):
+    def findByCci(self, date, code,  period, line):
         query = """
         select * from stocks
         where date <= (%s)::text::timestamptz
+        and code = (%s)
         order by date desc
         limit %s
         """
-        data = (date, period)
+        data = (date, code, period)
         self.cur.execute(query, data)
         entities = self.cur.fetchall()
-
-        dfList = [self.utils.tupleToStockEntity(i).toDict() for i in entities]
+        dfList = [self.utils.tupleToStockEntity(i).toDict() for i in entities[::-1]]
         df = pd.DataFrame.from_records(dfList)
         res = talib.CCI(
-            df["high"],
-            df["low"],
-            df["close"],
+            high=df["high"],
+            low=df["low"],
+            close=df["close"],
             timeperiod=period
         )
-        return res
+        value = res.iloc[-1]
+        if value >= line:
+            return entities[0]
 
-    def findBySigma(self, date, period, line):
+    def findBySigma(self, date, code, period, line):
         query = """
                 select * from stocks
-                where date <= %s
+                where date <= (%s)::text::timestamptz
+                and code = %s
                 order by date desc
                 limit %s
                 """
-        data = (date, period)
+        data = (date, code, period)
         self.cur.execute(query, data)
         entities = self.cur.fetchall()
-        df = [i.toDict() for i in entities]
-
+        dfList = [self.utils.tupleToStockEntity(i).toDict() for i in entities]
+        df = pd.DataFrame.from_records(dfList)
         res = df['close'].rolling(period).std()
         return res
 
-    def findByParabolic(self, date, acceleration, maximum, upper):
+    def findByParabolicUpper(self, date, code, acceleration, maximum, upper):
         query = """
         select * from stocks
-        where date <= %s
+        where date <= (%s)::text::timestamptz
+        and code = %s
         order by date desc
         """
-        data = date
+        data = (date, code)
         self.cur.execute(query, data)
         entities = self.cur.fetchall()
-        df = [i.toDict() for i in entities]
+        dfList = [self.utils.tupleToStockEntity(i).toDict() for i in entities[::-1]]
+        df = pd.DataFrame.from_records(dfList)
         res = talib.SAR(
-            df["high"],
-            df["low"],
+            high=df["high"],
+            low=df["low"],
             acceleration=acceleration,
             maximum=maximum
         )
-        return res
+        entity = self.utils.tupleToStockEntity(entities[0])
+        if entity.high >= res.iloc[-1]:
+            return entities[0]
+
+    def findStocksByCodesAndOrderByVolumeDescending(self, date, codes):
+        query = """
+                select * from stocks
+                where date = (%s)::text::timestamptz
+                and code = any(%s)
+                order by volume desc
+                """
+        data = (date, codes)
+        self.cur.execute(query, data)
+        entities = self.cur.fetchall()
+        return entities
 

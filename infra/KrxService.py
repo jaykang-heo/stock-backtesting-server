@@ -12,13 +12,12 @@ class KrxService:
     def findStocksByCode(self, date):
         kospi = pd.DataFrame()
         kosdaq = pd.DataFrame()
+        time.sleep(1)
         try:
-            time.sleep(1)
             kospi = krxAPI.get_market_ohlcv(date, market="KOSPI")
         except Exception as e:
             print("Get KOSPI market data failed", date, e)
         try:
-            time.sleep(1)
             kosdaq = krxAPI.get_market_ohlcv(date, market="KOSDAQ")
         except Exception as e:
             print("Get KOSDAQ market data failed", date, e)

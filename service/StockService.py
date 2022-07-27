@@ -15,7 +15,7 @@ class StockService:
     def syncStocksFromKrxAndSave(self):
         # dates = self.utils.getYearDates()
         today = datetime.date.today().strftime('%Y%m%d')
-        validDates = self.krxService.getValidBusinessDays(fromDate=19850101, toDate=today)
+        validDates = self.krxService.getValidBusinessDays(fromDate=20220401, toDate=today)
         for date in validDates:
             stocks = self.krxService.findStocksByCode(date)
             print(date, len(stocks))

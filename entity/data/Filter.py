@@ -1,3 +1,5 @@
+from typing import List
+
 from entity.data import VolumeOrder, SigmaOrder, PsarOrder, ChangeRateOrder, CciOrder, AmountOrder
 
 
@@ -5,17 +7,17 @@ class Filter:
     def __init__(
             self,
             date,
-            volumeOrder: VolumeOrder,
-            amountOrder: AmountOrder,
-            cciOrder: CciOrder,
-            changeRateOrder: ChangeRateOrder,
-            psarOrder: PsarOrder,
-            sigmaOrder: SigmaOrder
+            volumeOrders,
+            amountOrders,
+            cciOrders,
+            changeRateOrders,
+            psarOrders,
+            sigmaOrders
     ):
         self.date = date
-        self.volumeOrder = volumeOrder
-        self.amountOrder = amountOrder
-        self.sigmaOrder = sigmaOrder
-        self.psarOrder = psarOrder
-        self.changeRateOrder = changeRateOrder
-        self.cciOrder = cciOrder
+        self.volumeOrders = volumeOrders
+        self.amountOrders = amountOrders
+        self.sigmaOrders = sigmaOrders
+        self.psarOrders = psarOrders
+        self.changeRateOrders = changeRateOrders
+        self.cciOrders = cciOrders
