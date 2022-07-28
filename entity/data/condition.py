@@ -1,23 +1,21 @@
 from typing import List
 
+from pydantic import BaseModel
+
 from entity.data import volume_order, sigma_order, psar_order, changerate_order, cci_order, amount_order
+from entity.data.amount_order import AmountOrder
+from entity.data.cci_order import CciOrder
+from entity.data.changerate_order import ChangeRateOrder
+from entity.data.psar_order import PsarOrder
+from entity.data.sigma_order import SigmaOrder
+from entity.data.volume_order import VolumeOrder
 
 
-class Condition:
-    def __init__(
-            self,
-            date,
-            volume_orders,
-            amount_orders,
-            cci_orders,
-            changerate_orders,
-            psar_orders,
-            sigma_orders
-    ):
-        self.date = date
-        self.volume_orders = volume_orders
-        self.amount_orders = amount_orders
-        self.sigma_orders = sigma_orders
-        self.psar_orders = psar_orders
-        self.change_rate_orders = changerate_orders
-        self.cci_orders = cci_orders
+class Condition(BaseModel):
+    date: int
+    volume_orders: List[VolumeOrder]
+    amount_orders: List[AmountOrder]
+    sigma_orders: List[SigmaOrder]
+    psar_orders: List[PsarOrder]
+    change_rate_orders: List[ChangeRateOrder]
+    cci_orders: List[CciOrder]

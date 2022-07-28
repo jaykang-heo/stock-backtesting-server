@@ -1,5 +1,7 @@
-class VolumeOrder:
-    def __init__(self, limit, ascending):
-        self.limit = limit
-        self.ascending = ascending
+from pydantic import BaseModel
+
+
+class VolumeOrder(BaseModel):
+    limit: int
+    ascending: bool
 

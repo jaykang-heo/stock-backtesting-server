@@ -1,9 +1,20 @@
-class ListStocksByCondition:
-    def __init__(self, date, volume_orders, amount_orders, changerate_orders, cci_orders, psar_orders, sigma_orders):
-        self. date = date
-        self.volume_orders = volume_orders
-        self.amount_orders = amount_orders
-        self.changerate_orders = changerate_orders
-        self.cci_orders = cci_orders
-        self.psar_orders = psar_orders
-        self.sigma_orders = sigma_orders
+from typing import List
+
+from pydantic import BaseModel
+
+from entity.data.amount_order import AmountOrder
+from entity.data.cci_order import CciOrder
+from entity.data.changerate_order import ChangeRateOrder
+from entity.data.psar_order import PsarOrder
+from entity.data.sigma_order import SigmaOrder
+from entity.data.volume_order import VolumeOrder
+
+
+class ListStocksByConditionRequest(BaseModel):
+    date: int
+    volume_orders: List[VolumeOrder]
+    amount_orders: List[AmountOrder]
+    changerate_orders: List[ChangeRateOrder]
+    cci_orders: List[CciOrder]
+    psar_orders: List[PsarOrder]
+    sigma_orders: List[SigmaOrder]

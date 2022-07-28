@@ -1,4 +1,8 @@
-class ListStocksByConditionResponse:
-    def __init__(self, date, codes):
-        self.date = date
-        self.codes = codes
+from typing import List
+
+from pydantic import BaseModel
+
+
+class ListStocksByConditionResponse(BaseModel):
+    date: int
+    codes: List[str]

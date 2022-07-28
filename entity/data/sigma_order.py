@@ -1,4 +1,6 @@
-class SigmaOrder(object):
-    def __init__(self, period, line):
-        self.period = period
-        self.line = line
+from pydantic import BaseModel
+
+
+class SigmaOrder(BaseModel):
+    period: int
+    line: int

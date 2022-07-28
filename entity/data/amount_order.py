@@ -1,4 +1,6 @@
-class AmountOrder(object):
-    def __init__(self, limit, ascending):
-        self.limit = limit
-        self.ascending = ascending
+from pydantic import BaseModel
+
+
+class AmountOrder(BaseModel):
+    limit: int
+    ascending: bool
