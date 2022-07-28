@@ -1,16 +1,16 @@
 import datetime
 import pandas as pd
 
-from entity.StockEntity import StockEntity
+from entity.stock_entity import StockEntity
 
 
 class Utils:
     def tupleToStockEntity(self, tuple):
         return StockEntity(
             code=tuple[0],
-            stockType=tuple[1],
+            stock_type=tuple[1],
             date=tuple[2],
-            changeRate=tuple[3],
+            changerate=tuple[3],
             open=tuple[4],
             high=int(tuple[5]),
             low=int(tuple[6]),

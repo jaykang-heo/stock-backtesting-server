@@ -1,13 +1,13 @@
 class StockEntity(object):
     # TODO: get accurate quarter and year profit
-    def __init__(self, code, stockType, date, changeRate, open, high, low, close, volume, amount):
+    def __init__(self, code, stock_type, date, changerate, open, high, low, close, volume, amount):
         # 종목코드
         self.code = code
         # 주식 종류 i.e KOSDAQ, KOSPI, ETF, ...
-        self.stockType = stockType
+        self.stockType = stock_type
         # 일봉 일자
         self.date = date
-        self.changeRate = changeRate
+        self.changerate = changerate
         # 시가
         self.open = open
         # 고가
@@ -26,7 +26,7 @@ class StockEntity(object):
             'code': self.code,
             'stockType': self.stockType,
             'date': self.date,
-            'changeRate': self.changeRate,
+            'changeRate': self.changerate,
             'open': self.open,
             'high': self.high,
             'low': self.low,

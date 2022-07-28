@@ -9,7 +9,8 @@ class KrxService:
     def __init__(self):
         pass
 
-    def findStocksByCode(self, date):
+    @staticmethod
+    def find_stocks_by_code(date):
         kospi = pd.DataFrame()
         kosdaq = pd.DataFrame()
         time.sleep(1)
@@ -23,7 +24,8 @@ class KrxService:
             print("Get KOSDAQ market data failed", date, e)
         return pd.concat([kospi, kosdaq])
 
-    def getValidBusinessDays(self, fromDate, toDate):
-        dates = krxAPI.get_previous_business_days(fromdate=fromDate, todate=toDate)
+    @staticmethod
+    def get_valid_business_days(from_date, to_date):
+        dates = krxAPI.get_previous_business_days(fromdate=from_date, todate=to_date)
         res = [i.strftime('%Y%m%d') for i in dates]
         return res

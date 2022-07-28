@@ -2,12 +2,12 @@ from dataclasses import dataclass
 
 from typing import List
 
-from entity.data.Filter import Filter
+from entity.data.condition import Condition
 
 
 @dataclass
 class StockBackTestResponse:
     date: int
     percentage: float
-    stockCodes: List[str]
+    stock_codes: List[str]
 

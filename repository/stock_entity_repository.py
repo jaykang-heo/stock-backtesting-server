@@ -1,9 +1,9 @@
-from entity.StockEntity import StockEntity
+from entity.stock_entity import StockEntity
 import psycopg2
 import pandas as pd
 import talib
 
-from service.Utils import Utils
+from service.utils import Utils
 
 
 class StockEntityRepository:
@@ -28,21 +28,20 @@ class StockEntityRepository:
         # DI
         self.utils = Utils()
 
-    def deleteAll(self):
+    def delete_all(self):
         query = """
         delete from stocks
         """
         self.cur.execute(query)
         self.conn.commit()
 
-
-    def saveEntity(self, entity: StockEntity):
+    def save_entity(self, entity: StockEntity):
         query = """
                     insert into 
                     stocks (code, stocktype, date, changerate, open, high, low, close, volume, amount) 
                     values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                     """
-        data = (entity.code, entity.stockType, entity.date, entity.changeRate, entity.open, entity.high, entity.low,
+        data = (entity.code, entity.stockType, entity.date, entity.changerate, entity.open, entity.high, entity.low,
                 entity.close, entity.volume, entity.amount)
         if entity.high == 0 and entity.low == 0 and entity.close == 0 and entity.open == 0:
             pass
@@ -53,7 +52,7 @@ class StockEntityRepository:
             )
             self.conn.commit()
 
-    def findByVolumeOrder(self, date, limit, ascending):
+    def find_by_volume_order(self, date, limit, ascending):
         if ascending:
             query = """
             select * from stocks
@@ -81,7 +80,7 @@ class StockEntityRepository:
             )
             return self.cur.fetchall()
 
-    def findByAmountOrder(self, date, limit, ascending):
+    def find_by_amount_order(self, date, limit, ascending):
         if ascending:
             query = """
             select * from stocks
@@ -109,7 +108,7 @@ class StockEntityRepository:
             )
             return self.cur.fetchall()
 
-    def findByChnageRateOrder(self, date, limit, ascending):
+    def find_by_changerate_order(self, date, limit, ascending):
         if ascending:
             query = """
             select * from stocks
@@ -137,7 +136,7 @@ class StockEntityRepository:
             )
             return self.cur.fetchall()
 
-    def findByCci(self, date, code,  period, line):
+    def find_by_cci(self, date, code, period, line):
         query = """
         select * from stocks
         where date <= (%s)::text::timestamptz
@@ -160,7 +159,7 @@ class StockEntityRepository:
         if value >= line:
             return entities[0]
 
-    def findBySigma(self, date, code, period, line):
+    def find_by_sigma(self, date, code, period, line):
         query = """
                 select * from stocks
                 where date <= (%s)::text::timestamptz
@@ -176,7 +175,7 @@ class StockEntityRepository:
         res = df['close'].rolling(period).std()
         return res
 
-    def findByParabolicUpper(self, date, code, acceleration, maximum, upper):
+    def find_by_psar_upper(self, date, code, acceleration, maximum, upper):
         query = """
         select * from stocks
         where date <= (%s)::text::timestamptz
@@ -198,7 +197,7 @@ class StockEntityRepository:
         if entity.high >= res.iloc[-1]:
             return entities[0]
 
-    def findStocksByCodesAndOrderByVolumeDescending(self, date, codes):
+    def find_stocks_by_codes_and_order_by_volume_descending(self, date, codes):
         query = """
                 select * from stocks
                 where date = (%s)::text::timestamptz
@@ -209,4 +208,3 @@ class StockEntityRepository:
         self.cur.execute(query, data)
         entities = self.cur.fetchall()
         return entities
-
