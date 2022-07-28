@@ -35,8 +35,3 @@ class StockService:
                 self.stockEntityRepository.save_entity(stockEntity)
 
 
-test = StockService()
-test.syncStocksFromKrxAndSave()
-
-
-

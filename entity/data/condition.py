@@ -13,9 +13,9 @@ from entity.data.volume_order import VolumeOrder
 
 class Condition(BaseModel):
     date: int
-    volume_orders: List[VolumeOrder]
-    amount_orders: List[AmountOrder]
-    sigma_orders: List[SigmaOrder]
-    psar_orders: List[PsarOrder]
-    change_rate_orders: List[ChangeRateOrder]
-    cci_orders: List[CciOrder]
+    volume_orders: List[VolumeOrder] = None
+    amount_orders: List[AmountOrder] = None
+    sigma_orders: List[SigmaOrder] = None
+    psar_orders: List[PsarOrder] = None
+    changerate_orders: List[ChangeRateOrder] = None
+    cci_orders: List[CciOrder] = None
