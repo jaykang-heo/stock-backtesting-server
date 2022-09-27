@@ -5,27 +5,48 @@ from entity.data.amount_order import AmountOrder
 from entity.data.cci_order import CciOrder
 from entity.data.changerate_order import ChangeRateOrder
 from entity.data.condition import Condition
+from entity.data.psar_order import PsarOrder
 from entity.data.volume_order import VolumeOrder
+from infra.fdr_service import FdrService
 from infra.krx_service import KrxService
 from repository.stock_entity_repository import StockEntityRepository
+import talib
+
+from service.utils import Utils
 
 
 class StockConditionService:
     def __init__(self):
         self.stockRepository = StockEntityRepository()
+        self.fdrService = FdrService()
+        self.utils = Utils()
+
+    def find_stocks_by_cci_filter(self, codes, cci_order: CciOrder):
+        res = []
+        for code in codes:
+            cci_stock = self.stockRepository.find_by_cci(
+                cci_order.date,
+                code,
+                cci_order.period,
+                cci_order.line,
+                cci_order.operator
+            )
+            if cci_stock:
+                res.append(cci_stock[0])
+        return res
 
     def find_stocks_by_filter(self, condition_set: condition):
         volume_ordered_stocks = []
         if condition_set.volume_orders:
             for volumeOrderFilter in condition_set.volume_orders:
-                volume_ordered_stock =  self.stockRepository.find_by_volume_order(
+                volume_ordered_stock = self.stockRepository.find_by_volume_order(
                     condition_set.date,
                     volumeOrderFilter.limit,
                     volumeOrderFilter.ascending
                 )
                 for stock in volume_ordered_stock:
                     volume_ordered_stocks.append(stock)
-        print("finished volume orders")
+        # print("finished volume orders")
 
         amount_ordered_stocks = []
         if condition_set.amount_orders:
@@ -37,7 +58,7 @@ class StockConditionService:
                 )
                 for stock in amount_ordered_stock:
                     amount_ordered_stocks.append(stock)
-        print("finished amount orders")
+        # print("finished amount orders")
 
         changerate_ordered_stocks = []
         if condition_set.changerate_orders:
@@ -49,7 +70,7 @@ class StockConditionService:
                 )
                 for stock in changerate_ordered_stock:
                     changerate_ordered_stocks.append(stock)
-        print("finished changerate orders")
+        # print("finished changerate orders")
 
         temp1 = set([i[0] for i in volume_ordered_stocks])
         temp2 = set([i[0] for i in amount_ordered_stocks])
@@ -62,27 +83,27 @@ class StockConditionService:
             for code in codes:
                 for cci_order in condition_set.cci_orders:
                     cci_stock = self.stockRepository.find_by_cci(
-                        condition_set.date,
+                        cci_order.date,
                         code,
                         cci_order.period,
-                        cci_order.line
+                        cci_order.line,
+                        cci_order.operator
                     )
                     cci_stocks.append(cci_stock)
+        # print("finished cci orders")
 
-        print("finished cci orders")
-
-        sigma_stocks = []
-        if condition_set.sigma_orders:
-            for code in codes[:1]:
-                for sigmaFilter in condition_set.sigma_orders:
-                    sigma_stock = self.stockRepository.find_by_sigma(
-                        condition_set.date,
-                        code,
-                        sigmaFilter.period,
-                        sigmaFilter.line
-                    )
-                    sigma_stocks.append(sigma_stock)
-        print("finished sigma orders")
+        # sigma_stocks = []
+        # if condition_set.sigma_orders:
+        #     for code in codes[:1]:
+        #         for sigmaFilter in condition_set.sigma_orders:
+        #             sigma_stock = self.stockRepository.find_by_sigma(
+        #                 condition_set.date,
+        #                 code,
+        #                 sigmaFilter.period,
+        #                 sigmaFilter.line
+        #             )
+        #             sigma_stocks.append(sigma_stock)
+        # print("finished sigma orders")
 
         psar_stocks = []
         if condition_set.psar_orders:
@@ -96,54 +117,48 @@ class StockConditionService:
                         psarFilter.upper
                     )
                     psar_stocks.append(psar_stock)
-        print("finished psar orders")
+        # print("psar stocks", psar_stocks)
+        # print("finished psar orders")
 
         temp4 = set([i[0] for i in cci_stocks if i is not None])
         # temp5 = [i[0] for i in sigma_stocks]
         # temp6 = [i[0] for i in psar_stocks]
 
-        res = temp1 & temp2 & temp3 & temp4
-
-        return res
+        if not temp1 and temp2 and temp3:
+            return set(temp4)
+        else:
+            return temp1 & temp2 & temp3 & temp4
 
     def find_stocks_by_code_volume_order(self, date, codes, volume_descending):
         if volume_descending:
             entities = self.stockRepository.find_stocks_by_codes_and_order_by_volume_descending(date, codes)
             return [i[0] for i in entities]
 
+    def result_by_prices(self, first, second, third):
+        pass
 
-krxService = KrxService()
-dates = krxService.get_valid_business_days(20100101, 20220727)
-service = StockConditionService()
-for date in dates:
-    res = service.find_stocks_by_filter(
-        Condition(
-            date=date,
-            volume_orders=[
-                VolumeOrder(
-                    limit=200,
-                    ascending=False
-                )
-            ],
-            amount_orders=[
-                AmountOrder(
-                    limit=200,
-                    ascending=False
-                )
-            ],
-            changerate_orders=[
-                ChangeRateOrder(
-                    limit=100,
-                    ascending=False
-                )
-            ],
-            cci_orders=[
-                CciOrder(
-                    period=60,
-                    line=100
-                )
-            ],
+    def find_stocks_by_psar_filter(self, date, code, psar_order: PsarOrder):
+        res = self.fdrService.find_df_stocks_by_code(code, date)
+        psar_res = talib.SAR(
+            high=res["High"],
+            low=res["Low"],
+            acceleration=psar_order.acceleration,
+            maximum=psar_order.maximum
         )
+        entity = self.utils.tupleToStockEntity(res[0])
+        if entity.high >= psar_res.iloc[-1]:
+            return res[0]
+
+
+test = StockConditionService()
+res = test.find_stocks_by_psar_filter(
+    '20220725',
+    '171120',
+    PsarOrder(
+        acceleration=0.002,
+        maximum=0.02,
+        upper=True
     )
-    print(res)
-    print("------------------------")
+)
+print(res)
+

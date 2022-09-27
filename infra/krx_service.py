@@ -9,6 +9,12 @@ class KrxService:
     def __init__(self):
         pass
 
+    def get_stock_codes(self):
+        date = krxAPI.get_nearest_business_day_in_a_week()
+        kospi = krxAPI.get_market_ticker_list(date, "KOSPI")
+        kosdaq = krxAPI.get_market_ticker_list(date, "KOSDAQ")
+        return kospi + kosdaq
+
     @staticmethod
     def find_stocks_by_code(date):
         kospi = pd.DataFrame()
