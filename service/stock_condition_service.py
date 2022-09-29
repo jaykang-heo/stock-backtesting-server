@@ -66,8 +66,7 @@ class StockConditionService:
                 )
                 for stock in volume_ordered_stock:
                     volume_ordered_stocks.append(stock)
-        print(volume_ordered_stock)
-        print("finished volume orders")
+        # print("finished volume orders")
 
         amount_ordered_stocks = []
         if condition_set.amount_orders:
@@ -79,8 +78,7 @@ class StockConditionService:
                 )
                 for stock in amount_ordered_stock:
                     amount_ordered_stocks.append(stock)
-        print(amount_ordered_stock)
-        print("finished amount orders")
+        # print("finished amount orders")
 
         changerate_ordered_stocks = []
         if condition_set.changerate_orders:
@@ -92,26 +90,19 @@ class StockConditionService:
                 )
                 for stock in changerate_ordered_stock:
                     changerate_ordered_stocks.append(stock)
-        print(changerate_ordered_stock)
-        print("finished changerate orders")
+        # print("finished changerate orders")
 
         temp1 = set([i[0] for i in volume_ordered_stocks])
         temp2 = set([i[0] for i in amount_ordered_stocks])
         temp3 = set([i[0] for i in changerate_ordered_stocks])
 
-        print(temp1)
-        print("052220" in temp1)
-
-        print(temp2)
-        print("052220" in temp2)
-        print(temp3)
         codes = list(temp1 & temp2 & temp3)
-        print(codes)
 
         cci_stocks = []
         if condition_set.cci_orders:
-            for code in codes:
-                for cci_order in condition_set.cci_orders:
+            for cci_order in condition_set.cci_orders:
+                temp_cci = []
+                for code in codes:
                     cci_stock = self.stockRepository.find_by_cci(
                         cci_order.date,
                         code,
@@ -119,10 +110,18 @@ class StockConditionService:
                         cci_order.line,
                         cci_order.operator
                     )
-                    cci_stocks.append(cci_stock)
-        print("finished cci orders")
+                    if cci_stock is not None:
+                        temp_cci.append(cci_stock[0])
 
-        temp4 = set([i[0] for i in cci_stocks if i is not None])
+                # print("printing cci stocks", cci_order.date, set(cci_stocks))
+                # print("printing temp stocks", cci_order.date, set(temp_cci))
+                if len(cci_stocks) == 0:
+                    cci_stocks = temp_cci
+                else:
+                    cci_stocks = set(cci_stocks) & set(temp_cci)
+
+        # temp4 = set([i[0] for i in cci_stocks if i is not None])
+        temp4 = set(cci_stocks)
 
         if not codes:
             return set(temp4)

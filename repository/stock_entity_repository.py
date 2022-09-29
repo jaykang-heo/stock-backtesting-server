@@ -86,7 +86,7 @@ class StockEntityRepository:
     def find_by_volume_order(self, date, limit, ascending):
         if ascending:
             query = """
-            select * from fdr_stocks
+            select * from stocks
             where date = %s
             order by volume asc 
             limit %s
@@ -99,7 +99,7 @@ class StockEntityRepository:
             return self.cur.fetchall()
         else:
             query = """
-                        select * from fdr_stocks
+                        select * from stocks
                         where date = %s
                         order by volume desc 
                         limit %s
@@ -114,7 +114,7 @@ class StockEntityRepository:
     def find_by_amount_order(self, date, limit, ascending):
         if ascending:
             query = """
-            select * from fdr_stocks
+            select * from stocks
             where date = %s
             order by amount asc
             limit %s
@@ -127,7 +127,7 @@ class StockEntityRepository:
             return self.cur.fetchall()
         else:
             query = """
-                        select * from fdr_stocks
+                        select * from stocks
                         where date = %s
                         order by amount desc
                         limit %s
@@ -142,7 +142,7 @@ class StockEntityRepository:
     def find_by_changerate_order(self, date, limit, ascending):
         if ascending:
             query = """
-            select * from fdr_stocks
+            select * from stocks
             where date = %s
             order by changerate asc
             limit %s
@@ -169,7 +169,7 @@ class StockEntityRepository:
 
     def find_by_cci(self, date, code, period, line, comp):
         query = """
-        select * from fdr_stocks
+        select * from stocks
         where date <= (%s)::text::timestamptz
         and code = (%s)
         order by date desc
