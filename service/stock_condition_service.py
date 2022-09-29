@@ -35,100 +35,6 @@ class StockConditionService:
                 res.append(cci_stock[0])
         return res
 
-    def find_stocks_by_filter(self, condition_set: condition):
-        volume_ordered_stocks = []
-        if condition_set.volume_orders:
-            for volumeOrderFilter in condition_set.volume_orders:
-                volume_ordered_stock = self.stockRepository.find_by_volume_order(
-                    condition_set.date,
-                    volumeOrderFilter.limit,
-                    volumeOrderFilter.ascending
-                )
-                for stock in volume_ordered_stock:
-                    volume_ordered_stocks.append(stock)
-        # print("finished volume orders")
-
-        amount_ordered_stocks = []
-        if condition_set.amount_orders:
-            for amountOrderFilter in condition_set.amount_orders:
-                amount_ordered_stock =  self.stockRepository.find_by_amount_order(
-                    condition_set.date,
-                    amountOrderFilter.limit,
-                    amountOrderFilter.ascending
-                )
-                for stock in amount_ordered_stock:
-                    amount_ordered_stocks.append(stock)
-        # print("finished amount orders")
-
-        changerate_ordered_stocks = []
-        if condition_set.changerate_orders:
-            for changeRateOrderFilter in condition_set.changerate_orders:
-                changerate_ordered_stock =  self.stockRepository.find_by_changerate_order(
-                    condition_set.date,
-                    changeRateOrderFilter.limit,
-                    changeRateOrderFilter.ascending
-                )
-                for stock in changerate_ordered_stock:
-                    changerate_ordered_stocks.append(stock)
-        # print("finished changerate orders")
-
-        temp1 = set([i[0] for i in volume_ordered_stocks])
-        temp2 = set([i[0] for i in amount_ordered_stocks])
-        temp3 = set([i[0] for i in changerate_ordered_stocks])
-
-        codes = list(temp1 & temp2 & temp3)
-
-        cci_stocks = []
-        if condition_set.cci_orders:
-            for code in codes:
-                for cci_order in condition_set.cci_orders:
-                    cci_stock = self.stockRepository.find_by_cci(
-                        cci_order.date,
-                        code,
-                        cci_order.period,
-                        cci_order.line,
-                        cci_order.operator
-                    )
-                    cci_stocks.append(cci_stock)
-        # print("finished cci orders")
-
-        # sigma_stocks = []
-        # if condition_set.sigma_orders:
-        #     for code in codes[:1]:
-        #         for sigmaFilter in condition_set.sigma_orders:
-        #             sigma_stock = self.stockRepository.find_by_sigma(
-        #                 condition_set.date,
-        #                 code,
-        #                 sigmaFilter.period,
-        #                 sigmaFilter.line
-        #             )
-        #             sigma_stocks.append(sigma_stock)
-        # print("finished sigma orders")
-
-        psar_stocks = []
-        if condition_set.psar_orders:
-            for code in codes:
-                for psarFilter in condition_set.psar_orders:
-                    psar_stock = self.stockRepository.find_by_psar_upper(
-                        condition_set.date,
-                        code,
-                        psarFilter.acceleration,
-                        psarFilter.maximum,
-                        psarFilter.upper
-                    )
-                    psar_stocks.append(psar_stock)
-        # print("psar stocks", psar_stocks)
-        # print("finished psar orders")
-
-        temp4 = set([i[0] for i in cci_stocks if i is not None])
-        # temp5 = [i[0] for i in sigma_stocks]
-        # temp6 = [i[0] for i in psar_stocks]
-
-        if not temp1 and temp2 and temp3:
-            return set(temp4)
-        else:
-            return temp1 & temp2 & temp3 & temp4
-
     def find_stocks_by_code_volume_order(self, date, codes, volume_descending):
         if volume_descending:
             entities = self.stockRepository.find_stocks_by_codes_and_order_by_volume_descending(date, codes)
@@ -149,16 +55,77 @@ class StockConditionService:
         if entity.high >= psar_res.iloc[-1]:
             return res[0]
 
+    def find_stocks_by_filter(self, condition_set: condition):
+        volume_ordered_stocks = []
+        if condition_set.volume_orders:
+            for volumeOrderFilter in condition_set.volume_orders:
+                volume_ordered_stock = self.stockRepository.find_by_volume_order(
+                    condition_set.date,
+                    volumeOrderFilter.limit,
+                    volumeOrderFilter.ascending
+                )
+                for stock in volume_ordered_stock:
+                    volume_ordered_stocks.append(stock)
+        print(volume_ordered_stock)
+        print("finished volume orders")
 
-test = StockConditionService()
-res = test.find_stocks_by_psar_filter(
-    '20220725',
-    '171120',
-    PsarOrder(
-        acceleration=0.002,
-        maximum=0.02,
-        upper=True
-    )
-)
-print(res)
+        amount_ordered_stocks = []
+        if condition_set.amount_orders:
+            for amountOrderFilter in condition_set.amount_orders:
+                amount_ordered_stock = self.stockRepository.find_by_amount_order(
+                    condition_set.date,
+                    amountOrderFilter.limit,
+                    amountOrderFilter.ascending
+                )
+                for stock in amount_ordered_stock:
+                    amount_ordered_stocks.append(stock)
+        print(amount_ordered_stock)
+        print("finished amount orders")
+
+        changerate_ordered_stocks = []
+        if condition_set.changerate_orders:
+            for changeRateOrderFilter in condition_set.changerate_orders:
+                changerate_ordered_stock = self.stockRepository.find_by_changerate_order(
+                    condition_set.date,
+                    changeRateOrderFilter.limit,
+                    changeRateOrderFilter.ascending
+                )
+                for stock in changerate_ordered_stock:
+                    changerate_ordered_stocks.append(stock)
+        print(changerate_ordered_stock)
+        print("finished changerate orders")
+
+        temp1 = set([i[0] for i in volume_ordered_stocks])
+        temp2 = set([i[0] for i in amount_ordered_stocks])
+        temp3 = set([i[0] for i in changerate_ordered_stocks])
+
+        print(temp1)
+        print("052220" in temp1)
+
+        print(temp2)
+        print("052220" in temp2)
+        print(temp3)
+        codes = list(temp1 & temp2 & temp3)
+        print(codes)
+
+        cci_stocks = []
+        if condition_set.cci_orders:
+            for code in codes:
+                for cci_order in condition_set.cci_orders:
+                    cci_stock = self.stockRepository.find_by_cci(
+                        cci_order.date,
+                        code,
+                        cci_order.period,
+                        cci_order.line,
+                        cci_order.operator
+                    )
+                    cci_stocks.append(cci_stock)
+        print("finished cci orders")
+
+        temp4 = set([i[0] for i in cci_stocks if i is not None])
+
+        if not codes:
+            return set(temp4)
+        else:
+            return temp1 & temp2 & temp3 & temp4
 

@@ -48,8 +48,3 @@ class StockService:
             print(len(codes), idx, len(stocks))
             for i in stocks:
                 self.stockEntityRepository.save_entity("FDR", i)
-
-
-
-test = StockService()
-test.download_fdr_data()
